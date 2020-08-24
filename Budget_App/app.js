@@ -1,6 +1,26 @@
 var budgetController = (function () {
+    var Expence = function (id, description, value) {
+        this.id = id;
+        this.description = description;
+        this.value = value;
+    };
+    var income = function (id, description, value) {
+        this.id = id;
+        this.description = description;
+        this.value = value;
+    };
 
 
+    var data = {
+        allIteams: {
+            allExpence: [],
+            allincome: []
+        },
+        tatals: {
+            exp: 0,
+            inc: 0
+        }
+    }
 })();
 
 var UIController = (function () {
