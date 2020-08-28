@@ -24,7 +24,7 @@ var budgetController = (function () {
     return {
         addIteam: function (type, des, val) {
             var ID, newIteam;
-            console.log(data.allIteams)
+
             if ((data.allIteams[type].length - 1) > 0) {
                 ID = data.allIteams[type][data.allIteams[type].length - 1].id + 1;
 
@@ -43,10 +43,8 @@ var budgetController = (function () {
             data.allIteams[type].push(newIteam);
             //return the new Iteam
             return newIteam;
-        },
-        test: function () {
-            console.log(data);
         }
+
 
     }
 
@@ -74,7 +72,6 @@ var UIController = (function () {
 
             var html, newHtml, element;
             //Create HTML string with placeholder text
-            console.log("888888888888888type" + type)
             if (type === 'inc') {
                 element = DomsStrings.incomeContainer;
                 html = ' <div class="item clearfix" id="income-%id%">' +
@@ -99,14 +96,23 @@ var UIController = (function () {
                     '</div>  </div> </div>';
             }
             //replace the placeholder with the Item valuues
-            console.log("**********" + html);
             newHtml = html.replace('%id%', obj.id);
             newHtml = newHtml.replace('%description%', obj.description);
             newHtml = newHtml.replace('%value%', obj.value);
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
+
         },
         getDOMStrings: function () {
             return DomsStrings;
+        }, clearFilds: function () {
+            var fields, fielsArray;
+            fields = document.querySelectorAll(DomsStrings.inputDescription + "," + DomsStrings.inputValue);
+            fielsArray = Array.prototype.slice.call(fields);
+            fielsArray.forEach(function (current, i) {
+                current.value = "";
+
+            });
+            fielsArray[0].focus();
         }
 
     }
@@ -124,16 +130,18 @@ var controller = (function (budgetCtrl, UICtrl) {
             }
         })
     }
-
+    var updadeBudgets = function () { };
     var ctrlAddIteam = function () {
         var input, newIteam;
         //get the field input data
-        input = UICtrl.getInput(); console.log(input);
+        input = UICtrl.getInput();
 
         //add new item to the budget controller
         newIteam = budgetCtrl.addIteam(input.type, input.description, input.value);
         //add the Item to UI
         UICtrl.addListIeam(newIteam, input.type);
+        //clear the filed
+        UICtrl.clearFilds();
         // calculate the budget
         // display the budet on the UI
     }
