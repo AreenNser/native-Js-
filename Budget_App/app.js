@@ -13,14 +13,43 @@ var budgetController = (function () {
 
     var data = {
         allIteams: {
-            allExpence: [],
-            allincome: []
+            exp: [],
+            inc: []
         },
         tatals: {
             exp: 0,
             inc: 0
         }
     }
+    return {
+        addIteam: function (type, des, val) {
+            var ID, newIteam;
+            console.log(data.allIteams)
+            if ((data.allIteams[type].length - 1) > 0) {
+                ID = data.allIteams[type][data.allIteams[type].length - 1].id + 1;
+
+            } else {
+                ID = 0;
+            }
+            //Crate new item based on 'inc' or 'exp' type
+
+            if (type === "exp") {
+                newIteam = new Expence(ID, des, val);
+            } else if (type === 'inc') {
+                newIteam = new income(ID, des, val);
+
+            }
+            // Push it into our data structre
+            data.allIteams[type].push(newIteam);
+            //return the new Iteam
+            return newIteam;
+        },
+        test: function () {
+            console.log(data);
+        }
+
+    }
+
 })();
 
 var UIController = (function () {
@@ -28,7 +57,9 @@ var UIController = (function () {
         inputType: '.add__type',
         inputDescription: '.add__description',
         inputValue: '.add__value',
-        inputButton: '.add__btn'
+        inputButton: '.add__btn',
+        incomeContainer: '.income__list',
+        expensesContainer: '.expenses__list'
     }
     return {
         getInput: function () {
@@ -38,6 +69,41 @@ var UIController = (function () {
                 description: document.querySelector(DomsStrings.inputDescription).value,
                 value: document.querySelector(DomsStrings.inputValue).value
             }
+        },
+        addListIeam: function (obj, type) {
+
+            var html, newHtml, element;
+            //Create HTML string with placeholder text
+            console.log("888888888888888type" + type)
+            if (type === 'inc') {
+                element = DomsStrings.incomeContainer;
+                html = ' <div class="item clearfix" id="income-%id%">' +
+                    ' <div class="item__description">%description%</div>' +
+                    '<div class="right clearfix">' +
+                    '<div class="item__value">%value%</div>' +
+                    '<div class="item__delete">' +
+                    ' <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button>' +
+                    ' </div>' +
+                    '</div>' +
+                    '</div>';
+            }
+            else if (type === 'exp') {
+                element = DomsStrings.expensesContainer;
+                html = ' <div class="item clearfix" id="expense-%id%">' +
+                    '<div class="item__description">%description%</div>' +
+                    '<div class="right clearfix">' +
+                    '<div class="item__value">%value%</div>' +
+                    ' <div class="item__percentage">10%</div>' +
+                    '<div class="item__delete">' +
+                    ' <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button>' +
+                    '</div>  </div> </div>';
+            }
+            //replace the placeholder with the Item valuues
+            console.log("**********" + html);
+            newHtml = html.replace('%id%', obj.id);
+            newHtml = newHtml.replace('%description%', obj.description);
+            newHtml = newHtml.replace('%value%', obj.value);
+            document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
         },
         getDOMStrings: function () {
             return DomsStrings;
@@ -60,7 +126,16 @@ var controller = (function (budgetCtrl, UICtrl) {
     }
 
     var ctrlAddIteam = function () {
-        var input = UICtrl.getInput(); console.log(input);
+        var input, newIteam;
+        //get the field input data
+        input = UICtrl.getInput(); console.log(input);
+
+        //add new item to the budget controller
+        newIteam = budgetCtrl.addIteam(input.type, input.description, input.value);
+        //add the Item to UI
+        UICtrl.addListIeam(newIteam, input.type);
+        // calculate the budget
+        // display the budet on the UI
     }
     return {
         init: function () {
