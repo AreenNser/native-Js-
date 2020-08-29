@@ -34,10 +34,10 @@ var budgetController = (function () {
     return {
         addIteam: function (type, des, val) {
             var ID, newIteam;
-
-            if ((data.allIteams[type].length - 1) > 0) {
+            console.log(data.allIteams[type].length - 1)
+            if ((data.allIteams[type].length) > 0) {
                 ID = data.allIteams[type][data.allIteams[type].length - 1].id + 1;
-
+                console.log(ID)
             } else {
                 ID = 0;
             }
@@ -53,6 +53,20 @@ var budgetController = (function () {
             data.allIteams[type].push(newIteam);
             //return the new Iteam
             return newIteam;
+        },
+        deleteIteam: function (type, id) {
+            var ids, index;
+            ids = data.allIteams[type].map(function (current) {
+                return current.id;
+            });
+            console.log(data.allIteams[type])
+            console.log(ids)
+            index = ids.indexOf(id);
+            if (index !== -1) {
+                data.allIteams[type].splice(index, 1);
+                console.log(data.allIteams[type].splice(index, 1))
+            }
+
         },
         calculateBudget: function () {
             //calculate total income and expenses
@@ -75,14 +89,16 @@ var budgetController = (function () {
                 totalExp: data.totals.exp,
                 precentage: data.precntage
             }
+        },
+        dataPrintTest: function () {
+            console.log(data);
         }
-
     }
 
 })();
 
 var UIController = (function () {
-    var DomsStrings = {
+    var DomStrings = {
         inputType: '.add__type',
         inputDescription: '.add__description',
         inputValue: '.add__value',
@@ -92,15 +108,16 @@ var UIController = (function () {
         budgetLabel: ".budget__value",
         incomeLabel: ".budget__income--value",
         expenseLabel: ".budget__expenses--value",
-        percentageLabel: '.budget__expenses--percentage'
+        percentageLabel: '.budget__expenses--percentage',
+        container: '.container'
     }
     return {
         getInput: function () {
 
             return {
-                type: document.querySelector(DomsStrings.inputType).value,
-                description: document.querySelector(DomsStrings.inputDescription).value,
-                value: parseFloat(document.querySelector(DomsStrings.inputValue).value)
+                type: document.querySelector(DomStrings.inputType).value,
+                description: document.querySelector(DomStrings.inputDescription).value,
+                value: parseFloat(document.querySelector(DomStrings.inputValue).value)
             }
         },
         addListIeam: function (obj, type) {
@@ -108,8 +125,8 @@ var UIController = (function () {
             var html, newHtml, element;
             //Create HTML string with placeholder text
             if (type === 'inc') {
-                element = DomsStrings.incomeContainer;
-                html = ' <div class="item clearfix" id="income-%id%">' +
+                element = DomStrings.incomeContainer;
+                html = ' <div class="item clearfix" id="inc-%id%">' +
                     ' <div class="item__description">%description%</div>' +
                     '<div class="right clearfix">' +
                     '<div class="item__value">%value%</div>' +
@@ -120,8 +137,8 @@ var UIController = (function () {
                     '</div>';
             }
             else if (type === 'exp') {
-                element = DomsStrings.expensesContainer;
-                html = ' <div class="item clearfix" id="expense-%id%">' +
+                element = DomStrings.expensesContainer;
+                html = ' <div class="item clearfix" id="exp-%id%">' +
                     '<div class="item__description">%description%</div>' +
                     '<div class="right clearfix">' +
                     '<div class="item__value">%value%</div>' +
@@ -137,11 +154,15 @@ var UIController = (function () {
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
 
         },
+        deletListIteam: function (selectorID) {
+            var elm = document.getElementById(selectorID);
+            elm.parentNode.removeChild(elm);
+        },
         getDOMStrings: function () {
-            return DomsStrings;
+            return DomStrings;
         }, clearFilds: function () {
             var fields, fielsArray;
-            fields = document.querySelectorAll(DomsStrings.inputDescription + "," + DomsStrings.inputValue);
+            fields = document.querySelectorAll(DomStrings.inputDescription + "," + DomStrings.inputValue);
             fielsArray = Array.prototype.slice.call(fields);
             fielsArray.forEach(function (current, i) {
                 current.value = "";
@@ -150,13 +171,13 @@ var UIController = (function () {
             fielsArray[0].focus();
         }, displayBudgt: function (obj) {
 
-            document.querySelector(DomsStrings.budgetLabel).textContent = obj.budget;
-            document.querySelector(DomsStrings.incomeLabel).textContent = obj.totalInc;
-            document.querySelector(DomsStrings.expenseLabel).textContent = obj.totalExp;
+            document.querySelector(DomStrings.budgetLabel).textContent = obj.budget;
+            document.querySelector(DomStrings.incomeLabel).textContent = obj.totalInc;
+            document.querySelector(DomStrings.expenseLabel).textContent = obj.totalExp;
             if (obj.precentage > 0) {
-                document.querySelector(DomsStrings.percentageLabel).textContent = obj.precentage + "%";
+                document.querySelector(DomStrings.percentageLabel).textContent = obj.precentage + "%";
             } else {
-                document.querySelector(DomsStrings.percentageLabel).textContent = '--';
+                document.querySelector(DomStrings.percentageLabel).textContent = '--';
             }
 
         }
@@ -175,6 +196,7 @@ var controller = (function (budgetCtrl, UICtrl) {
                 ctrlAddIteam();
             }
         })
+        document.querySelector(DOM.container).addEventListener("click", ctrlDeleteItem);
     }
     var updadeBudgets = function () {
         // calculate the budget
@@ -199,7 +221,24 @@ var controller = (function (budgetCtrl, UICtrl) {
         }
 
 
-    }
+    };
+
+    var ctrlDeleteItem = function (event) {
+        var iteamID, splitID, type, ID;
+        iteamID = event.target.parentNode.parentNode.parentNode.parentNode.id;
+        if (iteamID) {
+            //inc-id
+            splitID = iteamID.split('-');
+            type = splitID[0];
+            ID = splitID[1];
+            //delete the iteam from the data structure
+            budgetCtrl.deleteIteam(type, ID / 1);
+            UIController.deletListIteam(iteamID);
+            //delete the iteam from UI
+            updadeBudgets();
+
+        }
+    };
     return {
         init: function () {
             setupEventLiseners();
